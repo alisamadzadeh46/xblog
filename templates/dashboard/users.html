@@ -1,0 +1,58 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Users{% endblock %}
+{% block breadcrumb %}<span class="xbreadcrumb-sep"><i class="fas fa-chevron-right" style="font-size:.55rem"></i></span><span class="xbreadcrumb-current">Users</span>{% endblock %}
+{% block content %}
+<div class="xdash-page-header"><h1 class="xdash-page-title">Users</h1></div>
+<div class="xcard">
+  <div class="xtable-wrap">
+    <table class="xtable">
+      <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Posts</th><th>Joined</th><th>Author</th></tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>
+            <div class="xpost-cell">
+              <img src="{{ u.avatar_url }}" class="xpost-cell-img" alt="" style="width:36px;height:36px;border-radius:50%">
+              <div>
+                <div class="xpost-cell-title">{{ u.get_full_name|default:u.username }}</div>
+                <div class="xpost-cell-sub">@{{ u.username }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:.8rem;color:var(--text-3)">{{ u.email }}</td>
+          <td>
+            {% if u.is_superuser %}<span class="xstatus" style="background:rgba(244,33,46,.12);color:var(--red)">Superuser</span>
+            {% elif u.is_staff %}<span class="xstatus" style="background:rgba(255,212,0,.12);color:var(--yellow)">Staff</span>
+            {% elif u.is_author %}<span class="xstatus xs-approved">Author</span>
+            {% else %}<span class="xstatus xs-draft">Reader</span>{% endif %}
+          </td>
+          <td style="font-family:var(--mono);font-size:.78rem;color:var(--text-3)">{{ u.pc }}</td>
+          <td style="font-size:.75rem;color:var(--text-4)">{{ u.date_joined|date:"M d, Y" }}</td>
+          <td>
+            {% if not u.is_superuser and not u.is_staff %}
+            <label class="xtoggle">
+              <input type="checkbox" class="xuser-author-toggle" data-url="{% url 'dashboard:user_toggle' u.pk %}" {% if u.is_author %}checked{% endif %}>
+              <span class="xtoggle-slider"></span>
+            </label>
+            {% else %}<span style="font-size:.72rem;color:var(--text-4)">—</span>{% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-4)">No users found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "partials/pager.html" %}
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.xuser-author-toggle').forEach(t => {
+  t.addEventListener('change', async function() {
+    const r = await fetch(this.dataset.url, {method:'POST',headers:{'X-CSRFToken':csrf(),'Content-Type':'application/json'},body:'{}'});
+    if (!r.ok) this.checked = !this.checked;
+  });
+});
+</script>
+{% endblock %}

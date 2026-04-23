@@ -1,0 +1,134 @@
+{% extends "dashboard/base.html" %}
+{% load humanize %}
+{% block title %}Analytics{% endblock %}
+{% block breadcrumb %}
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+  <span class="xbreadcrumb-current">Analytics</span>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>const viewsData = {{ views_chart|safe }};</script>
+<script src="/static/js/charts.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="xdash-page-header">
+  <h1 class="xdash-page-title">Analytics</h1>
+</div>
+
+<!-- KPI cards -->
+<div class="xstat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:var(--s6)">
+  <div class="xstat-card c-blue">
+    <div class="xstat-icon"><i class="fas fa-eye"></i></div>
+    <div class="xstat-value">{{ v30|intcomma }}</div>
+    <div class="xstat-label">Views (30 days)</div>
+  </div>
+  <div class="xstat-card c-green">
+    <div class="xstat-icon"><i class="fas fa-chart-line"></i></div>
+    <div class="xstat-value">{{ v7|intcomma }}</div>
+    <div class="xstat-label">Views (7 days)</div>
+  </div>
+  <div class="xstat-card c-yellow">
+    <div class="xstat-icon"><i class="fas fa-calendar-day"></i></div>
+    <div class="xstat-value">{{ v1|intcomma }}</div>
+    <div class="xstat-label">Views today</div>
+  </div>
+</div>
+
+<!-- Views chart -->
+<div class="xcard" style="margin-bottom:var(--s6)">
+  <div class="xcard-head">
+    <span class="xcard-title">Page Views — Last 30 Days</span>
+  </div>
+  <div class="xcard-body">
+    <canvas id="xAnalyticsChart" height="80"></canvas>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s6);margin-bottom:var(--s6)">
+  <!-- Top posts -->
+  <div class="xcard">
+    <div class="xcard-head">
+      <span class="xcard-title"><i class="fas fa-trophy" style="color:var(--amber);margin-right:6px"></i>Top Posts by Views</span>
+    </div>
+    <div class="xtable-wrap">
+      <table class="xtable">
+        <thead>
+          <tr><th>#</th><th>Title</th><th>Views</th><th>Likes</th></tr>
+        </thead>
+        <tbody>
+          {% for p in top_posts %}
+          <tr>
+            <td style="font-family:var(--mono);font-size:.8rem;color:var(--text-5)">{{ forloop.counter }}</td>
+            <td>
+              <a href="{{ p.get_absolute_url }}" target="_blank" class="xpost-cell-title" style="font-size:.82rem">
+                {{ p.title|truncatechars:45 }}
+              </a>
+              <div class="xpost-cell-sub">{{ p.display_date|date:"M d, Y" }}</div>
+            </td>
+            <td style="font-family:var(--mono);font-size:.82rem;color:var(--text-2)">{{ p.views|intcomma }}</td>
+            <td style="font-family:var(--mono);font-size:.82rem;color:var(--text-3)">{{ p.likes }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text-5);font-size:.84rem">No published posts yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Category performance -->
+  <div class="xcard">
+    <div class="xcard-head">
+      <span class="xcard-title"><i class="fas fa-folder" style="color:var(--accent);margin-right:6px"></i>Category Performance</span>
+    </div>
+    <div class="xtable-wrap">
+      <table class="xtable">
+        <thead>
+          <tr><th>Category</th><th>Posts</th><th>Total Views</th></tr>
+        </thead>
+        <tbody>
+          {% for cat in cat_perf %}
+          <tr>
+            <td>
+              <a href="{{ cat.get_absolute_url }}" target="_blank" style="font-size:.84rem;font-weight:600;color:var(--text-2)">
+                {{ cat.name }}
+              </a>
+            </td>
+            <td style="font-family:var(--mono);font-size:.8rem;color:var(--text-3)">{{ cat.pc }}</td>
+            <td style="font-family:var(--mono);font-size:.8rem;color:var(--text-2)">{{ cat.tv|default:0|intcomma }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" style="text-align:center;padding:32px;color:var(--text-5);font-size:.84rem">No data yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Top referrers -->
+<div class="xcard">
+  <div class="xcard-head">
+    <span class="xcard-title"><i class="fas fa-external-link-alt" style="color:var(--text-4);margin-right:6px"></i>Top Referrers</span>
+  </div>
+  <div class="xtable-wrap">
+    <table class="xtable">
+      <thead><tr><th>#</th><th>Source</th><th>Visits</th></tr></thead>
+      <tbody>
+        {% for ref in top_refs %}
+        <tr>
+          <td style="font-family:var(--mono);font-size:.78rem;color:var(--text-5)">{{ forloop.counter }}</td>
+          <td style="font-size:.8rem;color:var(--text-3);max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            {{ ref.referer|truncatechars:80 }}
+          </td>
+          <td style="font-family:var(--mono);font-size:.82rem;color:var(--text-2)">{{ ref.n }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text-5);font-size:.84rem">No referrer data yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

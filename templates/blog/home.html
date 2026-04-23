@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ site_name }} — {{ site_tagline }}{% endblock %}
+
+{% block content %}
+<div class="xpage">
+
+{% if hero_post %}
+<section class="xhero">
+  <div class="xhero-grid">
+    <div>
+      <div class="xhero-eyebrow"><span class="xhero-eyebrow-dot"></span>{% if hero_post.category %}{{ hero_post.category.name }}{% else %}Featured{% endif %}</div>
+      <h1 class="xhero-title"><a href="{{ hero_post.get_absolute_url }}">{{ hero_post.title }}</a></h1>
+      <div class="xhero-meta">
+        <span class="xhero-meta-item"><i class="fas fa-clock"></i>{{ hero_post.reading_time }} min read</span>
+        <span class="xhero-sep">·</span>
+        <span class="xhero-meta-item"><i class="fas fa-eye"></i>{{ hero_post.views }}</span>
+        <span class="xhero-sep">·</span>
+        <span class="xhero-meta-item">{{ hero_post.display_date|date:"M d, Y" }}</span>
+      </div>
+      <div class="xhero-author">
+        <img src="{{ hero_post.author.avatar_url }}" class="xhero-avatar" alt="{{ hero_post.author }}">
+        <div>
+          <div class="xhero-author-name"><a href="{{ hero_post.author.get_absolute_url }}">{{ hero_post.author }}</a></div>
+          <div class="xhero-author-date">{{ hero_post.display_date|date:"F j, Y" }}</div>
+        </div>
+      </div>
+      <a href="{{ hero_post.get_absolute_url }}" class="xbtn xbtn-primary">Read story <i class="fas fa-arrow-right"></i></a>
+    </div>
+    {% if hero_post.cover %}
+    <div class="xhero-img"><a href="{{ hero_post.get_absolute_url }}"><img src="{{ hero_post.cover.url }}" alt="{{ hero_post.cover_alt|default:hero_post.title }}"></a></div>
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+<div class="xcol-layout" style="max-width:100%">
+  <div class="xcol-main" style="max-width:100%;border-right:none">
+
+    {% if featured %}
+    <div class="xsec-head" style="margin-top:8px"><span class="xsec-title">Featured</span></div>
+    {% for post in featured %}
+    <div class="xpost{% if forloop.first %} featured{% endif %}">
+      <div>
+        <a href="{% if post.category %}{{ post.category.get_absolute_url }}{% endif %}" class="xpost-cat">{{ post.category.name|default:"Uncategorized" }}</a>
+        <h2 class="xpost-title"><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+        <p class="xpost-excerpt">{{ post.excerpt }}</p>
+        <div class="xpost-footer">
+          <img src="{{ post.author.avatar_url }}" class="xpost-author-img" alt="{{ post.author }}">
+          <a href="{{ post.author.get_absolute_url }}" class="xpost-author">{{ post.author }}</a>
+          <span class="xpost-sep">·</span>
+          <span class="xpost-date">{{ post.display_date|date:"M d" }}</span>
+          <span class="xpost-sep">·</span>
+          <span class="xpost-rt">{{ post.reading_time }} min</span>
+          <span class="xpost-stat"><i class="fas fa-eye"></i>{{ post.views }}</span>
+        </div>
+      </div>
+      {% if post.cover %}<div class="xpost-thumb"><a href="{{ post.get_absolute_url }}"><img src="{{ post.cover.url }}" alt="{{ post.title }}"></a></div>{% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="xsec-head" style="margin-top:4px"><span class="xsec-title">Latest</span><a href="?page=2" class="xsec-link">More <i class="fas fa-arrow-right"></i></a></div>
+
+    {% for post in posts %}
+    <div class="xpost">
+      <div>
+        <a href="{% if post.category %}{{ post.category.get_absolute_url }}{% endif %}" class="xpost-cat">{{ post.category.name|default:"General" }}</a>
+        <h2 class="xpost-title"><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+        <p class="xpost-excerpt">{{ post.excerpt }}</p>
+        <div class="xpost-footer">
+          <img src="{{ post.author.avatar_url }}" class="xpost-author-img" alt="{{ post.author }}">
+          <a href="{{ post.author.get_absolute_url }}" class="xpost-author">{{ post.author }}</a>
+          <span class="xpost-sep">·</span>
+          <span class="xpost-date">{{ post.display_date|date:"M d" }}</span>
+          <span class="xpost-sep">·</span>
+          <span class="xpost-rt">{{ post.reading_time }} min</span>
+          <span class="xpost-stat"><i class="fas fa-eye"></i>{{ post.views }}</span>
+        </div>
+      </div>
+      {% if post.cover %}<div class="xpost-thumb"><a href="{{ post.get_absolute_url }}"><img src="{{ post.cover.url }}" alt="{{ post.title }}" loading="lazy"></a></div>{% endif %}
+    </div>
+    {% empty %}
+    <div class="xempty"><div class="xempty-icon"><i class="fas fa-pen-nib"></i></div><div class="xempty-title">No posts yet</div><div class="xempty-sub">Be the first to publish.</div></div>
+    {% endfor %}
+
+    {% include "partials/pager.html" %}
+
+  </div>
+</div>
+
+<section class="xnl-section">
+  <div class="xnl-section-title">Stay in the loop</div>
+  <div class="xnl-section-sub">Get the best stories delivered to your inbox. No spam, ever.</div>
+  <form class="xnl-section-form xnl-form-el" action="{% url 'blog:subscribe' %}" method="post">
+    {% csrf_token %}
+    <input type="email" name="email" class="xform-input" placeholder="your@email.com" required>
+    <button type="submit" class="xbtn xbtn-primary">Subscribe</button>
+  </form>
+</section>
+
+</div>
+{% endblock %}

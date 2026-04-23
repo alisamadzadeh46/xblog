@@ -1,0 +1,47 @@
+{% if is_paginated and page_obj.paginator.num_pages > 1 %}
+<nav class="xpager" aria-label="Pagination">
+
+  {% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.s %}&s={{ request.GET.s }}{% endif %}" class="xpager-btn" aria-label="Previous">
+    <i class="fas fa-chevron-left"></i>
+  </a>
+  {% else %}
+  <span class="xpager-btn disabled" aria-disabled="true"><i class="fas fa-chevron-left"></i></span>
+  {% endif %}
+
+  {# First page shortcut if we're far from start #}
+  {% if page_obj.number > 4 %}
+  <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="xpager-btn">1</a>
+  <span class="xpager-btn disabled" style="border:none;min-width:auto;padding:0 4px;color:var(--text-5)">…</span>
+  {% endif %}
+
+  {# Window of page numbers around current #}
+  {% for num in page_obj.paginator.page_range %}
+    {% if num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+      {% if page_obj.number == num %}
+      <span class="xpager-btn active" aria-current="page">{{ num }}</span>
+      {% else %}
+      <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.s %}&s={{ request.GET.s }}{% endif %}" class="xpager-btn">{{ num }}</a>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {# Last page shortcut if we're far from end #}
+  {% if page_obj.number < page_obj.paginator.num_pages|add:"-3" %}
+  <span class="xpager-btn disabled" style="border:none;min-width:auto;padding:0 4px;color:var(--text-5)">…</span>
+  <a href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="xpager-btn">{{ page_obj.paginator.num_pages }}</a>
+  {% endif %}
+
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.s %}&s={{ request.GET.s }}{% endif %}" class="xpager-btn" aria-label="Next">
+    <i class="fas fa-chevron-right"></i>
+  </a>
+  {% else %}
+  <span class="xpager-btn disabled" aria-disabled="true"><i class="fas fa-chevron-right"></i></span>
+  {% endif %}
+
+  <span style="font-size:.72rem;color:var(--text-5);font-family:var(--mono);margin-left:4px">
+    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+  </span>
+</nav>
+{% endif %}

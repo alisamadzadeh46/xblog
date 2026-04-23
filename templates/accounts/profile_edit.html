@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="xpage" style="padding-top:40px;max-width:600px">
+  <h1 style="font-family:var(--serif);font-style:italic;font-size:1.75rem;margin-bottom:28px">Edit Profile</h1>
+  <div class="xauth-card" style="padding:28px">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="xform-group">
+        <label class="xform-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<div class="xform-error">{{ field.errors|striptags }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="submit" class="xbtn xbtn-primary xbtn-sm"><i class="fas fa-save"></i> Save</button>
+        <a href="{% url 'accounts:profile' %}" class="xbtn xbtn-outline xbtn-sm">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

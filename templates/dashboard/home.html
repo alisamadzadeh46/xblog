@@ -1,0 +1,129 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Overview{% endblock %}
+{% block breadcrumb %}<span class="xbreadcrumb-current">Overview</span>{% endblock %}
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>const viewsData={{ views_chart|safe }};const catData={{ cat_chart|safe }};</script>
+<script src="/static/js/charts.js"></script>
+{% endblock %}
+{% block content %}
+<div class="xdash-page-header">
+  <h1 class="xdash-page-title">Overview</h1>
+  <a href="{% url 'dashboard:post_create' %}" class="xbtn xbtn-primary xbtn-sm"><i class="fas fa-plus"></i>New Post</a>
+</div>
+
+<div class="xstat-grid">
+  <div class="xstat-card c-blue">
+    <div class="xstat-icon"><i class="fas fa-file-alt"></i></div>
+    <div class="xstat-value">{{ total_posts }}</div>
+    <div class="xstat-label">Total Posts</div>
+    <div class="xstat-sub">{{ pub }} published · {{ draft }} drafts</div>
+  </div>
+  <div class="xstat-card c-green">
+    <div class="xstat-icon"><i class="fas fa-eye"></i></div>
+    <div class="xstat-value">{{ views_30d }}</div>
+    <div class="xstat-label">Views (30d)</div>
+    <div class="xstat-sub">{{ views_today }} today</div>
+  </div>
+  <div class="xstat-card c-yellow">
+    <div class="xstat-icon"><i class="fas fa-comments"></i></div>
+    <div class="xstat-value">{{ pending_comments }}</div>
+    <div class="xstat-label">Pending Comments</div>
+    <div class="xstat-sub"><a href="{% url 'dashboard:comments' %}?s=pending" style="color:var(--yellow)">Review →</a></div>
+  </div>
+  <div class="xstat-card c-red">
+    <div class="xstat-icon"><i class="fas fa-envelope"></i></div>
+    <div class="xstat-value">{{ subscribers }}</div>
+    <div class="xstat-label">Subscribers</div>
+    <div class="xstat-sub">Active</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 320px;gap:24px;margin-bottom:24px;">
+  <div class="xcard">
+    <div class="xcard-head"><span class="xcard-title">Page Views — 14 days</span></div>
+    <div class="xcard-body"><canvas id="xViewsChart" height="90"></canvas></div>
+  </div>
+  <div class="xcard">
+    <div class="xcard-head"><span class="xcard-title">Posts by Category</span></div>
+    <div class="xcard-body"><canvas id="xCatChart" height="200"></canvas></div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 300px;gap:24px;">
+  <div class="xcard">
+    <div class="xcard-head">
+      <span class="xcard-title">Recent Posts</span>
+      <a href="{% url 'dashboard:posts' %}" class="xbtn xbtn-outline xbtn-xs">All Posts</a>
+    </div>
+    <div class="xtable-wrap">
+      <table class="xtable">
+        <thead><tr><th>Title</th><th>Status</th><th>Views</th><th>Date</th><th></th></tr></thead>
+        <tbody>
+          {% for post in recent_posts %}
+          <tr>
+            <td>
+              <div class="xpost-cell">
+                {% if post.cover %}<img src="{{ post.cover.url }}" class="xpost-cell-img" alt="">{% endif %}
+                <div>
+                  <a href="{{ post.get_absolute_url }}" class="xpost-cell-title" target="_blank">{{ post.title|truncatechars:44 }}</a>
+                  <div class="xpost-cell-sub">{{ post.reading_time }} min · {{ post.category.name|default:"—" }}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="xstatus xs-{{ post.status }}">{{ post.status }}</span></td>
+            <td style="font-family:var(--mono);font-size:.78rem;color:var(--text-3)">{{ post.views }}</td>
+            <td style="font-size:.75rem;color:var(--text-4)">{{ post.created_at|date:"M d" }}</td>
+            <td>
+              <div class="xactions">
+                <a href="{% url 'dashboard:post_edit' post.slug %}" class="xact-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                <a href="{{ post.get_absolute_url }}" class="xact-btn" title="View" target="_blank"><i class="fas fa-eye"></i></a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-4);font-size:.85rem">No posts yet. <a href="{% url 'dashboard:post_create' %}" style="color:var(--accent)">Create one →</a></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:24px;">
+    {% if pending_list %}
+    <div class="xcard">
+      <div class="xcard-head">
+        <span class="xcard-title"><i class="fas fa-clock" style="color:var(--yellow);margin-right:6px"></i>Pending</span>
+        <a href="{% url 'dashboard:comments' %}?s=pending" class="xbtn xbtn-outline xbtn-xs">All</a>
+      </div>
+      {% for c in pending_list %}
+      <div class="xpc-item">
+        <img src="{{ c.get_author_avatar }}" alt="">
+        <div class="xpc-info">
+          <div class="xpc-who">{{ c.author_name }} <span>on</span> <a href="{{ c.post.get_absolute_url }}" target="_blank">{{ c.post.title|truncatechars:22 }}</a></div>
+          <div class="xpc-text">{{ c.content|truncatechars:55 }}</div>
+        </div>
+        <div class="xpc-btns">
+          <button class="xact-btn edit" data-id="{{ c.pk }}" data-comment-action="approved" title="Approve"><i class="fas fa-check"></i></button>
+          <button class="xact-btn del" data-id="{{ c.pk }}" data-comment-action="spam" title="Spam"><i class="fas fa-ban"></i></button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="xcard">
+      <div class="xcard-head"><span class="xcard-title"><i class="fas fa-trophy" style="color:var(--yellow);margin-right:6px"></i>Top Posts</span></div>
+      {% for post in top_posts %}
+      <div class="xtop-item">
+        <span class="xtop-num">{{ forloop.counter }}</span>
+        <div class="xtop-info">
+          <a href="{{ post.get_absolute_url }}" class="xtop-title" target="_blank">{{ post.title|truncatechars:38 }}</a>
+          <span class="xtop-views"><i class="fas fa-eye" style="font-size:.6rem;margin-right:3px"></i>{{ post.views }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

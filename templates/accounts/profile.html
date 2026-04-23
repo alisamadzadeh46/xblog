@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user }} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="xpage" style="padding-top:40px">
+  <div style="display:grid;grid-template-columns:260px 1fr;gap:40px;align-items:start">
+    <div>
+      <img src="{{ profile_user.avatar_url }}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid var(--border);margin-bottom:16px" alt="">
+      <h1 style="font-family:var(--serif);font-size:1.4rem;font-style:italic;margin-bottom:4px">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+      <p style="font-size:.82rem;color:var(--text-4);margin-bottom:12px">@{{ profile_user.username }}</p>
+      {% if profile_user.bio %}<p style="font-size:.875rem;color:var(--text-3);line-height:1.65;margin-bottom:16px">{{ profile_user.bio }}</p>{% endif %}
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+        {% if profile_user.twitter %}<a href="https://twitter.com/{{ profile_user.twitter }}" style="color:var(--text-4);font-size:.85rem" target="_blank"><i class="fab fa-twitter"></i></a>{% endif %}
+        {% if profile_user.github %}<a href="https://github.com/{{ profile_user.github }}" style="color:var(--text-4);font-size:.85rem" target="_blank"><i class="fab fa-github"></i></a>{% endif %}
+        {% if profile_user.linkedin %}<a href="{{ profile_user.linkedin }}" style="color:var(--text-4);font-size:.85rem" target="_blank"><i class="fab fa-linkedin"></i></a>{% endif %}
+        {% if profile_user.website %}<a href="{{ profile_user.website }}" style="color:var(--text-4);font-size:.85rem" target="_blank"><i class="fas fa-globe"></i></a>{% endif %}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <a href="{% url 'accounts:profile_edit' %}" class="xbtn xbtn-outline xbtn-sm" style="justify-content:center"><i class="fas fa-edit"></i> Edit Profile</a>
+        {% if user.is_staff or user.is_author %}<a href="{% url 'dashboard:home' %}" class="xbtn xbtn-primary xbtn-sm" style="justify-content:center"><i class="fas fa-chart-line"></i> Dashboard</a>{% endif %}
+      </div>
+    </div>
+    <div>
+      <div class="xsec-head" style="margin-top:0"><span class="xsec-title">Posts by {{ profile_user.get_full_name|default:profile_user.username }}</span></div>
+      {% for post in profile_user.posts.all %}
+      <div class="xpost">
+        <div>
+          <a href="{% if post.category %}{{ post.category.get_absolute_url }}{% endif %}" class="xpost-cat">{{ post.category.name|default:"General" }}</a>
+          <h2 class="xpost-title"><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+          <p class="xpost-excerpt">{{ post.excerpt|truncatewords:20 }}</p>
+          <div class="xpost-footer">
+            <span class="xpost-date">{{ post.display_date|date:"M d, Y" }}</span>
+            <span class="xpost-sep">·</span>
+            <span class="xpost-rt">{{ post.reading_time }} min</span>
+            <span class="xpost-stat"><i class="fas fa-eye"></i>{{ post.views }}</span>
+          </div>
+        </div>
+        {% if post.cover %}<div class="xpost-thumb"><a href="{{ post.get_absolute_url }}"><img src="{{ post.cover.url }}" alt="{{ post.title }}" loading="lazy"></a></div>{% endif %}
+      </div>
+      {% empty %}
+      <div class="xempty"><div class="xempty-icon"><i class="fas fa-pen-nib"></i></div><div class="xempty-title">No published posts yet.</div></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ author }} | {{ site_name }}{% endblock %}
+{% block content %}
+<div class="xpage">
+  <div class="xcat-header" style="display:flex;align-items:center;gap:20px;text-align:left">
+    <img src="{{ author.avatar_url }}" style="width:72px;height:72px;border-radius:50%;border:1px solid var(--border);object-fit:cover;flex-shrink:0" alt="{{ author }}">
+    <div>
+      <h1 class="xcat-title" style="margin-bottom:4px">{{ author.get_full_name|default:author.username }}</h1>
+      {% if author.bio %}<p class="xcat-desc">{{ author.bio }}</p>{% endif %}
+      <div style="display:flex;gap:10px;margin-top:10px">
+        {% if author.twitter %}<a href="https://twitter.com/{{ author.twitter }}" class="xfloat-btn" target="_blank"><i class="fab fa-twitter"></i></a>{% endif %}
+        {% if author.github %}<a href="https://github.com/{{ author.github }}" class="xfloat-btn" target="_blank"><i class="fab fa-github"></i></a>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 280px;gap:0" class="xcol-layout">
+    <div class="xcol-main">
+      {% for post in posts %}
+      <div class="xpost">
+        <div>
+          {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="xpost-cat">{{ post.category.name }}</a>{% endif %}
+          <h2 class="xpost-title"><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+          <p class="xpost-excerpt">{{ post.excerpt|truncatewords:28 }}</p>
+          <div class="xpost-footer">
+            <span class="xpost-date">{{ post.display_date|date:"M d, Y" }}</span>
+            <span class="xpost-sep">·</span><span class="xpost-rt">{{ post.reading_time }} min</span>
+            <span class="xpost-stat"><i class="fas fa-eye"></i>{{ post.views }}</span>
+          </div>
+        </div>
+        {% if post.cover %}<div class="xpost-thumb"><a href="{{ post.get_absolute_url }}"><img src="{{ post.cover.url }}" alt="{{ post.title }}" loading="lazy"></a></div>{% endif %}
+      </div>
+      {% empty %}
+      <div class="xempty"><div class="xempty-icon"><i class="fas fa-pen-nib"></i></div><div class="xempty-title">No published posts yet</div></div>
+      {% endfor %}
+      {% include "partials/pager.html" %}
+    </div>
+    <div class="xcol-side">{% include "partials/sidebar.html" %}</div>
+  </div>
+</div>
+{% endblock %}

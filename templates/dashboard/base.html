@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Dashboard{% endblock %} — {{ site_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,400;1,9..144,700;1,9..144,900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="stylesheet" href="/static/css/dashboard.css">
+{% block extra_css %}{% endblock %}
+<script>!function(){var t=localStorage.getItem('xtheme')||'dark';document.documentElement.setAttribute('data-theme',t)}()</script>
+</head>
+<body class="xdash-body">
+<div class="xdash-wrap">
+
+<!-- Sidebar -->
+<aside class="xdash-sidebar" id="xDashSidebar">
+  <div class="xdash-logo-row">
+    <a href="/" class="xdash-logo">{{ site_name }}</a>
+    <button class="xdash-close" id="xDashClose"><i class="fas fa-times"></i></button>
+  </div>
+  <nav class="xdash-nav">
+    <div class="xdash-nav-group">
+      <a href="{% url 'dashboard:home' %}" class="xdash-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+        <i class="fas fa-chart-line"></i>Overview
+      </a>
+      <a href="{% url 'dashboard:analytics' %}" class="xdash-nav-item {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+        <i class="fas fa-chart-bar"></i>Analytics
+      </a>
+    </div>
+    <span class="xdash-nav-label">Content</span>
+    <div class="xdash-nav-group">
+      <a href="{% url 'dashboard:posts' %}" class="xdash-nav-item {% if 'post' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="fas fa-file-alt"></i>Posts
+      </a>
+      <a href="{% url 'dashboard:post_create' %}" class="xdash-nav-item">
+        <i class="fas fa-plus"></i>New Post
+      </a>
+      <a href="{% url 'dashboard:categories' %}" class="xdash-nav-item {% if 'cat' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="fas fa-folder"></i>Categories
+      </a>
+    </div>
+    <span class="xdash-nav-label">Engage</span>
+    <div class="xdash-nav-group">
+      <a href="{% url 'dashboard:comments' %}" class="xdash-nav-item {% if 'comment' in request.resolver_match.url_name %}active{% endif %}">
+        <i class="fas fa-comments"></i>Comments
+        {% if pending_count %}<span class="xnav-badge">{{ pending_count }}</span>{% endif %}
+      </a>
+      <a href="{% url 'dashboard:newsletter' %}" class="xdash-nav-item {% if request.resolver_match.url_name == 'newsletter' %}active{% endif %}">
+        <i class="fas fa-envelope"></i>Newsletter
+      </a>
+    </div>
+    {% if request.user.is_staff %}
+    <span class="xdash-nav-label">Admin</span>
+    <div class="xdash-nav-group">
+      <a href="{% url 'dashboard:users' %}" class="xdash-nav-item {% if request.resolver_match.url_name == 'users' %}active{% endif %}">
+        <i class="fas fa-users"></i>Users
+      </a>
+      <a href="{% url 'dashboard:settings' %}" class="xdash-nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+        <i class="fas fa-cog"></i>Settings
+      </a>
+    </div>
+    {% endif %}
+    <div class="xdash-nav-group" style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border);">
+      <a href="/" class="xdash-nav-item"><i class="fas fa-external-link-alt"></i>View Blog</a>
+      <a href="{% url 'accounts:logout' %}" class="xdash-nav-item" style="color:var(--red)"><i class="fas fa-sign-out-alt"></i>Sign out</a>
+    </div>
+  </nav>
+</aside>
+
+<!-- Main -->
+<div class="xdash-main">
+  <header class="xdash-top">
+    <div class="xdash-top-left">
+      <button class="xdash-toggle" id="xDashToggle"><i class="fas fa-bars"></i></button>
+      <nav class="xbreadcrumb">
+        <a href="{% url 'dashboard:home' %}">Dashboard</a>
+        <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+        {% block breadcrumb %}<span class="xbreadcrumb-current">Overview</span>{% endblock %}
+      </nav>
+    </div>
+    <div class="xdash-top-right">
+      <button class="xtheme-btn" id="themeBtn"><i class="fas fa-sun" id="themeIcon"></i></button>
+      <div class="xdropdown">
+        <button class="xuser-btn">
+          <img src="{{ request.user.avatar_url }}" class="xavatar" alt="{{ request.user }}">
+          <span class="xuser-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+          <i class="fas fa-chevron-down" style="font-size:.55rem;color:var(--text-4)"></i>
+        </button>
+        <div class="xdropdown-menu">
+          <a href="{% url 'accounts:profile' %}" class="xdropdown-item"><i class="fas fa-user"></i>Profile</a>
+          <a href="{% url 'accounts:profile_edit' %}" class="xdropdown-item"><i class="fas fa-edit"></i>Edit Profile</a>
+          <div class="xdropdown-divider"></div>
+          <a href="{% url 'accounts:logout' %}" class="xdropdown-item danger"><i class="fas fa-sign-out-alt"></i>Sign out</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  {% if messages %}
+  <div class="xdash-alerts">
+    {% for m in messages %}
+    <div class="xalert xalert-{% if m.tags == 'error' %}error{% elif m.tags == 'warning' %}info{% else %}success{% endif %}" data-auto>
+      {{ m }}<button class="xalert-close"><i class="fas fa-times"></i></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="xdash-content">{% block content %}{% endblock %}</div>
+</div>
+
+</div><!-- xdash-wrap -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="/static/js/dashboard.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

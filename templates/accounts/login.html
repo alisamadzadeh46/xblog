@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Sign In — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="xauth-page">
+  <div class="xauth-box">
+    <div class="xauth-logo">{{ site_name }}</div>
+    <h1 class="xauth-title">Sign in to your account</h1>
+    <p class="xauth-sub">Welcome back. Enter your credentials to continue.</p>
+    <div class="xauth-card">
+      <form method="post">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div style="background:rgba(244,33,46,.08);border:1px solid rgba(244,33,46,.25);color:var(--red);font-size:.82rem;padding:10px 14px;border-radius:var(--r);margin-bottom:16px">
+          {{ form.non_field_errors|striptags }}
+        </div>
+        {% endif %}
+        <div class="xform-group">
+          <label class="xform-label">Username</label>
+          {{ form.username }}
+        </div>
+        <div class="xform-group">
+          <label class="xform-label">Password</label>
+          {{ form.password }}
+        </div>
+        <button type="submit" class="xbtn xbtn-primary" style="width:100%;justify-content:center;padding:10px">Sign in</button>
+      </form>
+    </div>
+    <div class="xauth-footer">
+      Don't have an account? <a href="{% url 'accounts:register' %}">Sign up free</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% with d=d %}
+<div class="xseo-score-row">
+  <div class="xseo-ring">
+    <svg class="xseo-svg" viewBox="0 0 36 36">
+      <circle class="xseo-bg" cx="18" cy="18" r="14"/>
+      <circle class="xseo-ring-fill xseo-ring-{{ d.seo_rating }}" cx="18" cy="18" r="14"
+        stroke-dasharray="{{ d.score }},100"/>
+    </svg>
+    <div class="xseo-circle-wrap"><div class="xseo-score-num">{{ d.score }}</div></div>
+  </div>
+  <div class="xseo-rating">
+    <span class="xseo-rating-{{ d.seo_rating }}">SEO: {{ d.seo_label }}</span>
+    <span class="xseo-rating-{{ d.read_rating }}">Read: {{ d.read_label }}</span>
+    <div class="xseo-wc">{{ d.wc }} words · {{ d.rt }} min</div>
+  </div>
+</div>
+<div class="xseo-section">SEO</div>
+{% for c in d.seo_checks %}
+<div class="xseo-check {{ c.status }}">
+  <i class="fas {% if c.status == 'good' %}fa-check-circle{% elif c.status == 'ok' %}fa-exclamation-circle{% else %}fa-times-circle{% endif %}"></i>
+  <span class="xseo-check-msg">{{ c.msg }}</span>
+</div>
+{% endfor %}
+<div class="xseo-section">Readability</div>
+{% for c in d.read_checks %}
+<div class="xseo-check {{ c.status }}">
+  <i class="fas {% if c.status == 'good' %}fa-check-circle{% elif c.status == 'ok' %}fa-exclamation-circle{% else %}fa-times-circle{% endif %}"></i>
+  <span class="xseo-check-msg">{{ c.msg }}</span>
+</div>
+{% endfor %}
+{% endwith %}

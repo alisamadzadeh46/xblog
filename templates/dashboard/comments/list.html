@@ -1,0 +1,165 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Comments{% endblock %}
+{% block breadcrumb %}
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+  <span class="xbreadcrumb-current">Comments</span>
+{% endblock %}
+
+{% block content %}
+<div class="xdash-page-header">
+  <h1 class="xdash-page-title">Comments</h1>
+  <div style="display:flex;gap:10px;align-items:center;font-size:.82rem;color:var(--text-3)">
+    <span><strong style="color:var(--amber)">{{ counts.pending }}</strong> pending</span>
+    <span>·</span>
+    <span><strong style="color:var(--green)">{{ counts.approved }}</strong> approved</span>
+    <span>·</span>
+    <span><strong style="color:var(--red)">{{ counts.spam }}</strong> spam</span>
+  </div>
+</div>
+
+<div class="xfilter-tabs">
+  <a href="?" class="xfilter-tab {% if not sf %}active{% endif %}">
+    All <span class="xfilter-n">{{ total_count }}</span>
+  </a>
+  <a href="?s=pending" class="xfilter-tab {% if sf == 'pending' %}active{% endif %}">
+    Pending <span class="xfilter-n">{{ counts.pending }}</span>
+  </a>
+  <a href="?s=approved" class="xfilter-tab {% if sf == 'approved' %}active{% endif %}">
+    Approved <span class="xfilter-n">{{ counts.approved }}</span>
+  </a>
+  <a href="?s=spam" class="xfilter-tab {% if sf == 'spam' %}active{% endif %}">
+    Spam <span class="xfilter-n">{{ counts.spam }}</span>
+  </a>
+</div>
+
+<div class="xcard">
+  <div class="xtable-wrap">
+    <table class="xtable">
+      <thead>
+        <tr>
+          <th>Author</th>
+          <th>Comment</th>
+          <th>Post</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th style="width:110px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in comments %}
+        <tr id="xcrow-{{ c.pk }}">
+          <td>
+            <div style="display:flex;align-items:center;gap:9px">
+              <img src="{{ c.author_avatar }}" alt=""
+                   style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--border)">
+              <div>
+                <div style="font-size:.83rem;font-weight:700;color:var(--text)">{{ c.author_name }}</div>
+                {% if c.guest_email %}
+                <div style="font-size:.7rem;color:var(--text-5)">{{ c.guest_email }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          <td style="max-width:280px">
+            <div style="font-size:.82rem;color:var(--text-3);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
+              {{ c.content }}
+            </div>
+          </td>
+          <td>
+            <a href="{{ c.post.get_absolute_url }}" target="_blank"
+               style="font-size:.79rem;color:var(--accent)">
+              {{ c.post.title|truncatechars:35 }}
+            </a>
+          </td>
+          <td>
+            <span class="xstatus xs-{{ c.status }}">{{ c.get_status_display }}</span>
+          </td>
+          <td style="font-size:.73rem;color:var(--text-4);white-space:nowrap">
+            {{ c.created_at|date:"M j, Y" }}<br>
+            <span style="color:var(--text-5)">{{ c.created_at|time:"H:i" }}</span>
+          </td>
+          <td>
+            <div class="xactions">
+              {% if c.status != 'approved' %}
+              <button class="xact-btn edit" data-id="{{ c.pk }}" data-comment-action="approved" title="Approve">
+                <i class="fas fa-check"></i>
+              </button>
+              {% endif %}
+              {% if c.status != 'spam' %}
+              <button class="xact-btn" data-id="{{ c.pk }}" data-comment-action="spam"
+                      title="Spam" style="color:var(--amber)">
+                <i class="fas fa-ban"></i>
+              </button>
+              {% endif %}
+              {% if c.status != 'pending' %}
+              <button class="xact-btn" data-id="{{ c.pk }}" data-comment-action="pending"
+                      title="Reset to pending" style="color:var(--text-4)">
+                <i class="fas fa-clock"></i>
+              </button>
+              {% endif %}
+              <button class="xact-btn del" data-id="{{ c.pk }}" data-comment-action="delete" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" style="text-align:center;padding:56px;color:var(--text-5)">
+            <i class="fas fa-comment-slash" style="font-size:2rem;display:block;margin-bottom:12px"></i>
+            No comments {% if sf %}with status "{{ sf }}"{% endif %}.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if is_paginated %}
+  <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:6px;align-items:center">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if sf %}&s={{ sf }}{% endif %}" class="xpager-btn">‹ Prev</a>
+    {% endif %}
+    <span style="font-size:.78rem;color:var(--text-4);font-family:var(--mono);margin:0 8px">
+      {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if sf %}&s={{ sf }}{% endif %}" class="xpager-btn">Next ›</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('[data-comment-action]').forEach(btn => {
+  btn.addEventListener('click', async function () {
+    const id     = this.dataset.id;
+    const action = this.dataset.commentAction;
+    try {
+      const r = await fetch(`/dashboard/comments/${id}/action/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+        body: JSON.stringify({ action }),
+      });
+      const d = await r.json();
+      if (action === 'delete') {
+        const row = document.getElementById('xcrow-' + id);
+        row.style.opacity = '0';
+        row.style.transition = 'opacity .25s';
+        setTimeout(() => row.remove(), 250);
+      } else {
+        const badge = document.querySelector('#xcrow-' + id + ' .xstatus');
+        if (badge) {
+          badge.textContent = action;
+          badge.className = 'xstatus xs-' + action;
+        }
+        // Remove action buttons that no longer apply
+        this.remove();
+      }
+    } catch (e) { console.error(e); }
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Delete Category{% endblock %}
+{% block breadcrumb %}
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+  <a href="{% url 'dashboard:categories' %}">Categories</a>
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+  <span class="xbreadcrumb-current">Delete</span>
+{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:center;padding-top:48px">
+  <div class="xdelete-box">
+    <div class="xdelete-icon"><i class="fas fa-folder-minus"></i></div>
+    <div class="xdelete-title">Delete "{{ object.name }}"?</div>
+    <div class="xdelete-sub">
+      This category has <strong>{{ object.published_count }}</strong> published post(s).<br>
+      Posts will remain but will have no category assigned. This cannot be undone.
+    </div>
+    <form method="post" class="xdelete-actions">
+      {% csrf_token %}
+      <button type="submit" class="xbtn xbtn-danger xbtn-sm">Yes, delete it</button>
+      <a href="{% url 'dashboard:categories' %}" class="xbtn xbtn-outline xbtn-sm">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

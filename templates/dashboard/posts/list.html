@@ -1,0 +1,88 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Posts{% endblock %}
+{% block breadcrumb %}<span class="xbreadcrumb-sep"><i class="fas fa-chevron-right" style="font-size:.55rem"></i></span><span class="xbreadcrumb-current">Posts</span>{% endblock %}
+{% block content %}
+<div class="xdash-page-header">
+  <h1 class="xdash-page-title">Posts</h1>
+  <a href="{% url 'dashboard:post_create' %}" class="xbtn xbtn-primary xbtn-sm"><i class="fas fa-plus"></i>New Post</a>
+</div>
+
+<div class="xfilter-tabs">
+  <a href="?" class="xfilter-tab {% if not sf %}active{% endif %}">All <span class="xfilter-n">{{ total_count }}</span></a>
+  <a href="?s=published" class="xfilter-tab {% if sf == 'published' %}active{% endif %}">Published <span class="xfilter-n">{{ counts.published }}</span></a>
+  <a href="?s=draft"     class="xfilter-tab {% if sf == 'draft'     %}active{% endif %}">Drafts <span class="xfilter-n">{{ counts.draft }}</span></a>
+  <a href="?s=review"    class="xfilter-tab {% if sf == 'review'    %}active{% endif %}">Review <span class="xfilter-n">{{ counts.review }}</span></a>
+  <a href="?s=archived"  class="xfilter-tab {% if sf == 'archived'  %}active{% endif %}">Archived <span class="xfilter-n">{{ counts.archived }}</span></a>
+</div>
+
+<form method="get" class="xaction-bar">
+  {% if sf %}<input type="hidden" name="s" value="{{ sf }}">{% endif %}
+  <input type="search" name="q" value="{{ qf }}" class="xform-input" style="max-width:240px;padding:6px 10px;font-size:.82rem" placeholder="Search posts…">
+  <select name="cat" class="xform-input" style="max-width:160px;padding:6px 10px;font-size:.82rem">
+    <option value="">All categories</option>
+    {% for cat in cats %}<option value="{{ cat.slug }}" {% if cf == cat.slug %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="xbtn xbtn-outline xbtn-sm"><i class="fas fa-filter"></i> Filter</button>
+  {% if qf or cf %}<a href="?{% if sf %}s={{ sf }}{% endif %}" class="xbtn xbtn-outline xbtn-sm" style="color:var(--text-4)"><i class="fas fa-times"></i> Clear</a>{% endif %}
+</form>
+
+<div class="xcard">
+  <div class="xtable-wrap">
+    <table class="xtable">
+      <thead>
+        <tr>
+          <th>Post</th><th>Category</th><th>Author</th>
+          <th>Status</th><th>Views</th><th>Date</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for post in posts %}
+        <tr>
+          <td style="max-width:300px">
+            <div class="xpost-cell">
+              {% if post.cover %}<img src="{{ post.cover.url }}" class="xpost-cell-img" alt="">{% endif %}
+              <div>
+                <a href="{% url 'dashboard:post_edit' post.slug %}" class="xpost-cell-title">{{ post.title|truncatechars:48 }}</a>
+                <div class="xpost-cell-sub">{{ post.reading_time }} min · {{ post.word_count }} words</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:.78rem;color:var(--text-3)">{{ post.category.name|default:"—" }}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px">
+              <img src="{{ post.author.avatar_url }}" style="width:22px;height:22px;border-radius:50%;object-fit:cover" alt="">
+              <span style="font-size:.78rem;color:var(--text-3)">{{ post.author.username }}</span>
+            </div>
+          </td>
+          <td>
+            <select class="xstatus-select xstatus xs-{{ post.status }}"
+                    data-url="{% url 'dashboard:post_status' post.slug %}"
+                    style="border:none;background:transparent;font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;padding:2px 4px">
+              <option value="draft"     {% if post.status == 'draft'     %}selected{% endif %}>Draft</option>
+              <option value="review"    {% if post.status == 'review'    %}selected{% endif %}>Review</option>
+              <option value="published" {% if post.status == 'published' %}selected{% endif %}>Published</option>
+              <option value="archived"  {% if post.status == 'archived'  %}selected{% endif %}>Archived</option>
+            </select>
+          </td>
+          <td style="font-family:var(--mono);font-size:.78rem;color:var(--text-3)">{{ post.views }}</td>
+          <td style="font-size:.75rem;color:var(--text-4);white-space:nowrap">{{ post.created_at|date:"M d, Y" }}</td>
+          <td>
+            <div class="xactions">
+              <a href="{% url 'dashboard:post_edit' post.slug %}"   class="xact-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+              <a href="{{ post.get_absolute_url }}"                  class="xact-btn"      title="View" target="_blank"><i class="fas fa-eye"></i></a>
+              <a href="{% url 'dashboard:post_delete' post.slug %}" class="xact-btn del"  title="Delete"><i class="fas fa-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center;padding:48px;color:var(--text-4)">
+          <div style="font-size:1.5rem;margin-bottom:8px">✍️</div>
+          No posts found. <a href="{% url 'dashboard:post_create' %}" style="color:var(--accent)">Create your first →</a>
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "partials/pager.html" %}
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "dashboard/base.html" %}
+{% block title %}{% if object %}Edit{% else %}New{% endif %} Category{% endblock %}
+{% block breadcrumb %}
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+  <a href="{% url 'dashboard:categories' %}">Categories</a>
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+  <span class="xbreadcrumb-current">{% if object %}Edit{% else %}New{% endif %}</span>
+{% endblock %}
+
+{% block content %}
+<div class="xdash-page-header">
+  <h1 class="xdash-page-title">{% if object %}Edit Category{% else %}New Category{% endif %}</h1>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 320px;gap:var(--s6);align-items:start">
+  <div class="xcard">
+    <div class="xcard-head"><span class="xcard-title">Category Details</span></div>
+    <div class="xcard-body">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="xform-group">
+          <label class="xform-label">{{ field.label }}</label>
+          <div class="{% if field.field.widget.input_type == 'checkbox' %}xform-check{% endif %}">
+            {{ field }}
+          </div>
+          {% if field.errors %}
+          <div class="xform-error">{{ field.errors|striptags }}</div>
+          {% endif %}
+          {% if field.help_text %}
+          <div class="xform-hint">{{ field.help_text }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+
+        <div style="display:flex;gap:10px;margin-top:var(--s4)">
+          <button type="submit" class="xbtn xbtn-primary xbtn-sm">
+            <i class="fas fa-save"></i> Save Category
+          </button>
+          <a href="{% url 'dashboard:categories' %}" class="xbtn xbtn-outline xbtn-sm">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Tips sidebar -->
+  <div>
+    <div class="xcard">
+      <div class="xcard-head"><span class="xcard-title">Tips</span></div>
+      <div class="xcard-body" style="font-size:.84rem;color:var(--text-3);line-height:1.7">
+        <p style="margin-bottom:12px"><strong style="color:var(--text)">Color</strong> — use a hex code like <code style="font-family:var(--mono);font-size:.8em;background:var(--bg-4);padding:2px 6px;border-radius:var(--r)">#6366f1</code> to tint the category badge.</p>
+        <p style="margin-bottom:12px"><strong style="color:var(--text)">Icon</strong> — any Font Awesome class, e.g. <code style="font-family:var(--mono);font-size:.8em;background:var(--bg-4);padding:2px 6px;border-radius:var(--r)">fas fa-code</code></p>
+        <p style="margin-bottom:0"><strong style="color:var(--text)">Order</strong> — lower numbers appear first in the navigation bar.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

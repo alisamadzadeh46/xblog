@@ -1,0 +1,11 @@
+{% if trending_posts %}
+<div class="section-label" style="font-size:.75rem">Trending</div>
+{% for post in trending_posts %}
+<a href="{{ post.get_absolute_url }}" style="text-decoration:none"><div class="trending-item"><div class="trending-num">{{ forloop.counter }}</div><div><div class="trending-cat">{{ post.category.name|default:"Post" }}</div><div class="trending-title">{{ post.title|truncatewords:8 }}</div></div></div></a>
+{% endfor %}
+{% endif %}
+<div class="nl-widget">
+  <div class="nl-widget-title">Newsletter</div>
+  <p class="nl-widget-sub">New stories, weekly.</p>
+  <form class="nl-form nl-submit-form" action="{% url 'blog:subscribe' %}" method="post">{% csrf_token %}<input class="xform-input" type="email" name="email" placeholder="your@email.com" required><button type="submit" class="btn-primary" style="width:100%;padding:.5rem;margin-top:.5rem">Subscribe</button></form>
+</div>

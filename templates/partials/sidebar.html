@@ -1,0 +1,39 @@
+<div class="xwidget">
+  <div class="xwidget-title">Topics</div>
+  <ul class="xcat-list">
+    {% for cat in nav_cats %}
+    <li>
+      <a href="{{ cat.get_absolute_url }}">
+        {{ cat.name }}
+        <span class="xcat-count">{{ cat.n }}</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% if recent_posts %}
+<div class="xwidget">
+  <div class="xwidget-title">Recent Posts</div>
+  {% for post in recent_posts %}
+  <div class="xtrend-item">
+    <span class="xtrend-num">{{ forloop.counter }}</span>
+    <div>
+      {% if post.category %}<div class="xtrend-meta" style="color:var(--accent);font-weight:700;font-size:.63rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">{{ post.category.name }}</div>{% endif %}
+      <a href="{{ post.get_absolute_url }}" class="xtrend-title">{{ post.title }}</a>
+      <div class="xtrend-meta">{{ post.published_at|date:"M d" }} · {{ post.reading_time }} min</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="xwidget xnl-widget">
+  <div class="xwidget-title">Newsletter</div>
+  <p class="xnl-sub">Get the best stories delivered to your inbox.</p>
+  <form class="xnl-form xnl-form-el" action="{% url 'blog:subscribe' %}" method="post">
+    {% csrf_token %}
+    <input type="email" name="email" class="xform-input" placeholder="your@email.com" required style="font-size:.82rem">
+    <button type="submit" class="xbtn xbtn-primary xbtn-sm" style="width:100%;justify-content:center">Subscribe</button>
+  </form>
+</div>

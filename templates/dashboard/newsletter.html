@@ -1,0 +1,102 @@
+{% extends "dashboard/base.html" %}
+{% load humanize %}
+{% block title %}Newsletter{% endblock %}
+{% block breadcrumb %}
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+  <span class="xbreadcrumb-current">Newsletter</span>
+{% endblock %}
+
+{% block content %}
+<div class="xdash-page-header">
+  <h1 class="xdash-page-title">Newsletter Subscribers</h1>
+  <div style="display:flex;gap:12px;align-items:center">
+    <div style="text-align:right">
+      <div style="font-size:1.4rem;font-weight:800;color:var(--text);font-family:var(--mono)">{{ active }}</div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-4)">Active</div>
+    </div>
+    <div style="width:1px;height:32px;background:var(--border)"></div>
+    <div style="text-align:right">
+      <div style="font-size:1.4rem;font-weight:800;color:var(--text-3);font-family:var(--mono)">{{ total }}</div>
+      <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-4)">Total</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter tabs -->
+<div class="xfilter-tabs">
+  <a href="?" class="xfilter-tab {% if not sf %}active{% endif %}">All <span class="xfilter-n">{{ total }}</span></a>
+  <a href="?s=active" class="xfilter-tab {% if sf == 'active' %}active{% endif %}">Active <span class="xfilter-n">{{ active }}</span></a>
+  <a href="?s=off"    class="xfilter-tab {% if sf == 'off'    %}active{% endif %}">Unsubscribed <span class="xfilter-n">{{ total|add:"-"|add:active }}</span></a>
+</div>
+
+<div class="xcard">
+  <div class="xtable-wrap">
+    <table class="xtable">
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Subscribed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for sub in subs %}
+        <tr>
+          <td>
+            <span style="font-size:.875rem;font-weight:600;color:var(--text)">{{ sub.email }}</span>
+          </td>
+          <td style="font-size:.84rem;color:var(--text-3)">
+            {{ sub.name|default:"—" }}
+          </td>
+          <td>
+            {% if sub.active %}
+            <span class="xstatus xs-approved">Active</span>
+            {% else %}
+            <span class="xstatus xs-archived">Unsubscribed</span>
+            {% endif %}
+          </td>
+          <td style="font-size:.75rem;color:var(--text-4)">
+            {{ sub.subscribed_at|date:"M j, Y" }}<br>
+            <span style="color:var(--text-5)">{{ sub.subscribed_at|time:"H:i" }}</span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" style="text-align:center;padding:56px;color:var(--text-5)">
+            <i class="fas fa-envelope" style="font-size:2rem;display:block;margin-bottom:12px"></i>
+            No subscribers yet{% if sf %} with this status{% endif %}.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if is_paginated %}
+  <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:6px;align-items:center">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if sf %}&s={{ sf }}{% endif %}" class="xpager-btn">‹ Prev</a>
+    {% endif %}
+    <span style="font-size:.78rem;color:var(--text-4);font-family:var(--mono);margin:0 8px">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+       · {{ page_obj.paginator.count }} subscriber{{ page_obj.paginator.count|pluralize }}
+    </span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if sf %}&s={{ sf }}{% endif %}" class="xpager-btn">Next ›</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- Growth info box -->
+{% if total > 0 %}
+<div style="margin-top:var(--s6);padding:var(--s5) var(--s6);border:1px solid var(--border);border-radius:var(--r-md);background:var(--bg-2);font-size:.84rem;color:var(--text-3)">
+  <i class="fas fa-info-circle" style="color:var(--accent);margin-right:8px"></i>
+  <strong style="color:var(--text)">{{ active }}</strong> of <strong style="color:var(--text)">{{ total }}</strong> subscribers are currently active.
+  {% if total > active %}
+  <strong style="color:var(--red);margin-left:4px">{{ total|add:"-"|add:active }}</strong> have unsubscribed.
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

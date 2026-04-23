@@ -1,0 +1,238 @@
+{% extends "dashboard/base.html" %}
+{% block title %}{{ action }} Post{% endblock %}
+{% block breadcrumb %}
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right" style="font-size:.55rem"></i></span>
+  <a href="{% url 'dashboard:posts' %}">Posts</a>
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right" style="font-size:.55rem"></i></span>
+  <span class="xbreadcrumb-current">{{ action }}</span>
+{% endblock %}
+{% block extra_css %}{{ form.media.css }}{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" id="xPostForm">
+{% csrf_token %}
+<div class="xeditor-layout">
+
+  <!-- ── Left: editor ──────────────────────────────── -->
+  <div class="xeditor-main">
+
+    <!-- Title + slug -->
+    <div class="xeditor-title-wrap">
+      <input type="text" name="title" id="xEditorTitle" class="xeditor-title"
+             placeholder="Post title…" value="{{ form.title.value|default:'' }}" required>
+      <div class="xeditor-slug">
+        <span style="color:var(--text-4)">{{ site_url }}/post/</span><span id="xSlugPreview" style="color:var(--accent)">{{ object.slug|default:"post-slug" }}</span><span style="color:var(--text-4)">/</span>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="xeditor-toolbar">
+      <div class="xeditor-toolbar-left">
+        <select name="category" class="xform-input" style="width:auto;padding:5px 12px;font-size:.8rem">
+          <option value="">No category</option>
+          {% for cat in categories %}
+          <option value="{{ cat.pk }}" {% if form.category.value == cat.pk|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" name="tags" value="{{ form.tags.value|default:'' }}"
+               class="xform-input" style="width:200px;padding:5px 12px;font-size:.8rem" placeholder="Tags, comma separated">
+      </div>
+      <div class="xeditor-toolbar-right">
+        <select name="status" class="xform-input" style="width:auto;padding:5px 12px;font-size:.8rem">
+          <option value="draft"     {% if form.status.value == 'draft'     %}selected{% endif %}>Draft</option>
+          <option value="review"    {% if form.status.value == 'review'    %}selected{% endif %}>In Review</option>
+          <option value="published" {% if form.status.value == 'published' %}selected{% endif %}>Published</option>
+        </select>
+        <button type="submit" class="xbtn xbtn-outline xbtn-sm"><i class="fas fa-save"></i> Save</button>
+        <button type="submit" name="_publish" value="1" class="xbtn xbtn-primary xbtn-sm"><i class="fas fa-paper-plane"></i> Publish</button>
+      </div>
+    </div>
+
+    <!-- Excerpt -->
+    <div style="padding:12px 20px;border-bottom:1px solid var(--border)">
+      <textarea name="excerpt" class="xform-input" rows="2"
+                placeholder="Short excerpt — auto-generated if empty"
+                style="resize:none">{{ form.excerpt.value|default:'' }}</textarea>
+    </div>
+
+    <!-- Tab nav -->
+    <div class="xeditor-tabs" data-tabs>
+      <div class="xeditor-tab-list">
+        <button type="button" class="xeditor-tab-btn active" data-target="tabContent">Content</button>
+        <button type="button" class="xeditor-tab-btn" data-target="tabMedia">Media</button>
+        <button type="button" class="xeditor-tab-btn" data-target="tabOptions">Options</button>
+        <button type="button" class="xeditor-tab-btn" data-target="tabSEO">SEO</button>
+      </div>
+    </div>
+
+    <!-- Content tab -->
+    <div class="xeditor-tab-pane active" data-tab="tabContent">
+      {{ form.content }}
+    </div>
+
+    <!-- Media tab -->
+    <div class="xeditor-tab-pane" data-tab="tabMedia">
+      <div class="xform-row xform-row-2">
+        <div class="xform-group">
+          <label class="xform-label">Cover Image</label>
+          {% if object.cover %}
+          <img src="{{ object.cover.url }}" style="height:80px;border-radius:var(--r);margin-bottom:8px;object-fit:cover" alt="">
+          {% endif %}
+          <input type="file" name="cover" class="xform-input" accept="image/*">
+        </div>
+        <div>
+          <div class="xform-group">
+            <label class="xform-label">Alt Text</label>
+            <input type="text" name="cover_alt" value="{{ form.cover_alt.value|default:'' }}" class="xform-input" placeholder="Describe the image">
+          </div>
+          <div class="xform-group">
+            <label class="xform-label">Caption</label>
+            <input type="text" name="cover_cap" value="{{ form.cover_cap.value|default:'' }}" class="xform-input" placeholder="Optional caption">
+          </div>
+        </div>
+        <div class="xform-group">
+          <label class="xform-label">OG Image <span style="color:var(--text-4);font-weight:400">(social sharing)</span></label>
+          {% if object.og_image %}
+          <img src="{{ object.og_image.url }}" style="height:60px;border-radius:var(--r);margin-bottom:8px;object-fit:cover" alt="">
+          {% endif %}
+          <input type="file" name="og_image" class="xform-input" accept="image/*">
+          <div class="xform-hint">Recommended: 1200×630px</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Options tab -->
+    <div class="xeditor-tab-pane" data-tab="tabOptions">
+      <div class="xform-row xform-row-3">
+        <label class="xform-check" style="gap:10px;cursor:pointer;font-size:.875rem;color:var(--text-2)">
+          <label class="xform-switch">
+            <input type="checkbox" name="is_featured" {% if form.is_featured.value %}checked{% endif %}>
+            <span class="xform-switch-slider"></span>
+          </label>
+          Featured post
+        </label>
+        <label class="xform-check" style="gap:10px;cursor:pointer;font-size:.875rem;color:var(--text-2)">
+          <label class="xform-switch">
+            <input type="checkbox" name="is_pinned" {% if form.is_pinned.value %}checked{% endif %}>
+            <span class="xform-switch-slider"></span>
+          </label>
+          Pinned (hero)
+        </label>
+        <label class="xform-check" style="gap:10px;cursor:pointer;font-size:.875rem;color:var(--text-2)">
+          <label class="xform-switch">
+            <input type="checkbox" name="allow_comments" {% if form.allow_comments.value != False %}checked{% endif %}>
+            <span class="xform-switch-slider"></span>
+          </label>
+          Allow comments
+        </label>
+        <div class="xform-group">
+          <label class="xform-label">Reading level</label>
+          <select name="level" class="xform-input">
+            <option value="beginner"     {% if form.level.value == 'beginner'     %}selected{% endif %}>Beginner</option>
+            <option value="intermediate" {% if form.level.value == 'intermediate' %}selected{% endif %}>Intermediate</option>
+            <option value="advanced"     {% if form.level.value == 'advanced'     %}selected{% endif %}>Advanced</option>
+          </select>
+        </div>
+        <div class="xform-group">
+          <label class="xform-label">Schema type</label>
+          <select name="schema" class="xform-input">
+            <option value="BlogPosting" {% if form.schema.value == 'BlogPosting' %}selected{% endif %}>Blog Post</option>
+            <option value="Article"     {% if form.schema.value == 'Article'     %}selected{% endif %}>Article</option>
+            <option value="NewsArticle" {% if form.schema.value == 'NewsArticle' %}selected{% endif %}>News Article</option>
+          </select>
+        </div>
+        <div class="xform-group">
+          <label class="xform-label">Canonical URL</label>
+          <input type="url" name="canonical" value="{{ form.canonical.value|default:'' }}" class="xform-input" placeholder="Leave blank for auto">
+        </div>
+        <label class="xform-check" style="gap:10px;cursor:pointer;font-size:.875rem;color:var(--text-2)">
+          <label class="xform-switch">
+            <input type="checkbox" name="no_index" {% if form.no_index.value %}checked{% endif %}>
+            <span class="xform-switch-slider"></span>
+          </label>
+          No index
+        </label>
+        <label class="xform-check" style="gap:10px;cursor:pointer;font-size:.875rem;color:var(--text-2)">
+          <label class="xform-switch">
+            <input type="checkbox" name="no_follow" {% if form.no_follow.value %}checked{% endif %}>
+            <span class="xform-switch-slider"></span>
+          </label>
+          No follow
+        </label>
+      </div>
+    </div>
+
+    <!-- SEO tab -->
+    <div class="xeditor-tab-pane" data-tab="tabSEO">
+      <div class="xform-group">
+        <label class="xform-label">Focus Keyword</label>
+        <input type="text" name="focus_kw" id="id_focus_kw"
+               value="{{ form.focus_kw.value|default:'' }}"
+               class="xform-input" placeholder="e.g. django blog tutorial">
+        <div class="xform-hint">The keyword/phrase you want this post to rank for in Google.</div>
+      </div>
+      <div class="xform-group">
+        <label class="xform-label">
+          Meta Title
+          <span id="xMtCount" class="xserp-meta-counter" style="margin-left:8px">0/60</span>
+        </label>
+        <input type="text" name="meta_title" id="id_meta_title"
+               value="{{ form.meta_title.value|default:'' }}"
+               class="xform-input" maxlength="70"
+               placeholder="SEO title (uses post title if empty)">
+      </div>
+      <div class="xform-group">
+        <label class="xform-label">
+          Meta Description
+          <span id="xMdCount" class="xserp-meta-counter" style="margin-left:8px">0/160</span>
+        </label>
+        <textarea name="meta_desc" id="id_meta_desc"
+                  class="xform-input" rows="2" maxlength="160"
+                  placeholder="SEO description (uses excerpt if empty)">{{ form.meta_desc.value|default:'' }}</textarea>
+      </div>
+
+      <!-- SERP Preview -->
+      <div style="margin-top:20px">
+        <div class="xform-label" style="margin-bottom:10px">Google Search Preview</div>
+        <div class="xserp" style="border:1px solid var(--border)">
+          <div class="xserp-label">google.com</div>
+          <div class="xserp-url">{{ site_url }}/post/<span id="xSerpSlug">{{ object.slug|default:"post-slug" }}</span>/</div>
+          <div class="xserp-title" id="xSerpTitle">{{ form.meta_title.value|default:form.title.value|default:"Post title" }}</div>
+          <div class="xserp-desc"  id="xSerpDesc">{{ form.meta_desc.value|default:form.excerpt.value|default:"Post description will appear here in Google search results." }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Right: SEO panel ──────────────────────────── -->
+  <div>
+    <div class="xseo-panel" id="xSeoPanel">
+      <div class="xseo-head">
+        <h6><i class="fas fa-search" style="margin-right:6px;color:var(--accent)"></i>SEO Analysis</h6>
+        <button type="button" class="xbtn xbtn-outline xbtn-xs" id="xRunSeo">Analyze</button>
+      </div>
+      <div id="xSeoResults">
+        {% if seo %}
+        {% include "seo/panel.html" with d=seo %}
+        {% else %}
+        <div style="text-align:center;padding:28px 16px">
+          <i class="fas fa-search" style="font-size:1.5rem;color:var(--text-4);display:block;margin-bottom:10px"></i>
+          <p style="font-size:.78rem;color:var(--text-4);line-height:1.6">Click <strong>Analyze</strong> or start typing to see your SEO score and recommendations.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div><!-- xeditor-layout -->
+</form>
+{% endblock %}
+
+{% block extra_js %}
+{{ form.media.js }}
+<script>
+const SEO_URL  = "{% url 'seo:live' %}";
+const SITE_URL = "{{ site_url }}";
+</script>
+<script src="/static/js/editor.js"></script>
+{% endblock %}

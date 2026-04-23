@@ -1,0 +1,91 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Categories{% endblock %}
+{% block breadcrumb %}
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+  <span class="xbreadcrumb-current">Categories</span>
+{% endblock %}
+
+{% block content %}
+<div class="xdash-page-header">
+  <h1 class="xdash-page-title">Categories</h1>
+  <a href="{% url 'dashboard:cat_create' %}" class="xbtn xbtn-primary xbtn-sm">
+    <i class="fas fa-plus"></i> New Category
+  </a>
+</div>
+
+<div class="xcard">
+  <div class="xtable-wrap">
+    <table class="xtable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Color</th>
+          <th>Icon</th>
+          <th>Posts</th>
+          <th>Featured</th>
+          <th>Order</th>
+          <th style="width:100px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in cats %}
+        <tr>
+          <td>
+            <div>
+              <a href="{{ cat.get_absolute_url }}" target="_blank"
+                 style="font-size:.875rem;font-weight:700;color:var(--text)">{{ cat.name }}</a>
+              {% if cat.description %}
+              <div style="font-size:.72rem;color:var(--text-4);margin-top:2px">{{ cat.description|truncatechars:55 }}</div>
+              {% endif %}
+            </div>
+          </td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:inline-block;width:22px;height:22px;border-radius:var(--r);background:{{ cat.color }};border:1px solid var(--border)"></span>
+              <span style="font-family:var(--mono);font-size:.72rem;color:var(--text-4)">{{ cat.color }}</span>
+            </div>
+          </td>
+          <td>
+            {% if cat.icon %}
+            <i class="{{ cat.icon }}" style="color:var(--text-3)"></i>
+            {% else %}
+            <span style="color:var(--text-5)">—</span>
+            {% endif %}
+          </td>
+          <td style="font-family:var(--mono);font-size:.82rem;color:var(--text-2)">{{ cat.n }}</td>
+          <td>
+            {% if cat.is_featured %}
+            <span style="color:var(--amber)"><i class="fas fa-star"></i></span>
+            {% else %}
+            <span style="color:var(--text-5)"><i class="far fa-star"></i></span>
+            {% endif %}
+          </td>
+          <td style="font-family:var(--mono);font-size:.78rem;color:var(--text-4)">{{ cat.order }}</td>
+          <td>
+            <div class="xactions">
+              <a href="{% url 'dashboard:cat_edit' cat.pk %}" class="xact-btn edit" title="Edit">
+                <i class="fas fa-pen"></i>
+              </a>
+              <a href="{{ cat.get_absolute_url }}" class="xact-btn" title="View" target="_blank">
+                <i class="fas fa-eye"></i>
+              </a>
+              <a href="{% url 'dashboard:cat_delete' cat.pk %}" class="xact-btn del" title="Delete">
+                <i class="fas fa-trash"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" style="text-align:center;padding:56px;color:var(--text-5)">
+            <i class="fas fa-folder-open" style="font-size:2rem;display:block;margin-bottom:12px"></i>
+            No categories yet.
+            <a href="{% url 'dashboard:cat_create' %}" style="color:var(--accent);font-weight:600;margin-left:6px">Create one →</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

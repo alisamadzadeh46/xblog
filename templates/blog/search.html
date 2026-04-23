@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{% if q %}{{ q }} — Search{% else %}Search{% endif %} | {{ site_name }}{% endblock %}
+{% block content %}
+<div class="xpage">
+  <div class="xsearch-header">
+    <div class="xcat-badge"><i class="fas fa-search"></i>Search</div>
+    <h1 class="xcat-title">{% if q %}"{{ q }}"{% else %}Search everything{% endif %}</h1>
+    {% if q %}<div class="xsearch-count">{{ count }} result{{ count|pluralize }}</div>{% endif %}
+    <div class="xsearch-form-lg">
+      <form method="get" style="display:flex;gap:8px;width:100%">
+        <input type="search" name="q" value="{{ q }}" class="xform-input xsearch-input-lg" placeholder="Search posts, topics…" autofocus>
+        <button type="submit" class="xbtn xbtn-primary xbtn-sm"><i class="fas fa-search"></i></button>
+      </form>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 280px;gap:0;padding:8px 0" class="xcol-layout">
+    <div class="xcol-main">
+      {% for post in posts %}
+      <div class="xpost">
+        <div>
+          {% if post.category %}<a href="{{ post.category.get_absolute_url }}" class="xpost-cat">{{ post.category.name }}</a>{% endif %}
+          <h2 class="xpost-title"><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+          <p class="xpost-excerpt">{{ post.excerpt|truncatewords:30 }}</p>
+          <div class="xpost-footer">
+            <img src="{{ post.author.avatar_url }}" class="xpost-author-img" alt="">
+            <a href="{{ post.author.get_absolute_url }}" class="xpost-author">{{ post.author.get_full_name|default:post.author.username }}</a>
+            <span class="xpost-sep">·</span><span class="xpost-date">{{ post.display_date|date:"M d, Y" }}</span>
+            <span class="xpost-sep">·</span><span class="xpost-rt">{{ post.reading_time }} min</span>
+          </div>
+        </div>
+        {% if post.cover %}<div class="xpost-thumb"><a href="{{ post.get_absolute_url }}"><img src="{{ post.cover.url }}" alt="{{ post.title }}" loading="lazy"></a></div>{% endif %}
+      </div>
+      {% empty %}
+      <div class="xempty">
+        <div class="xempty-icon"><i class="fas fa-search"></i></div>
+        <div class="xempty-title">{% if q %}No results for "{{ q }}"{% else %}Start searching{% endif %}</div>
+        <div class="xempty-sub">{% if q %}Try different keywords or browse categories below.{% else %}Enter a search term above.{% endif %}</div>
+      </div>
+      {% endfor %}
+      {% include "partials/pager.html" %}
+    </div>
+    <div class="xcol-side">{% include "partials/sidebar.html" %}</div>
+  </div>
+</div>
+{% endblock %}

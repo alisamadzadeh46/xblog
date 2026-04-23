@@ -1,0 +1,160 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Settings{% endblock %}
+{% block breadcrumb %}
+  <span class="xbreadcrumb-sep"><i class="fas fa-chevron-right"></i></span>
+  <span class="xbreadcrumb-current">Settings</span>
+{% endblock %}
+
+{% block content %}
+<div class="xdash-page-header">
+  <h1 class="xdash-page-title">Site Settings</h1>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+<div style="display:grid;grid-template-columns:1fr 300px;gap:var(--s6);align-items:start">
+
+  <!-- Left column -->
+  <div style="display:flex;flex-direction:column;gap:var(--s5)">
+
+    <!-- General -->
+    <div class="xcard">
+      <div class="xcard-head"><span class="xcard-title">General</span></div>
+      <div class="xcard-body">
+        <div class="xform-row xform-row-2">
+          <div class="xform-group">
+            <label class="xform-label">Site Name</label>
+            <input type="text" name="site_name" value="{{ s.site_name }}" class="xform-input" placeholder="My Blog">
+          </div>
+          <div class="xform-group">
+            <label class="xform-label">Tagline</label>
+            <input type="text" name="tagline" value="{{ s.tagline }}" class="xform-input" placeholder="Think. Write. Publish.">
+          </div>
+        </div>
+        <div class="xform-group">
+          <label class="xform-label">Logo</label>
+          {% if s.logo %}
+          <div style="margin-bottom:8px">
+            <img src="{{ s.logo.url }}" style="height:40px;border-radius:var(--r);border:1px solid var(--border)" alt="Logo">
+          </div>
+          {% endif %}
+          <input type="file" name="logo" class="xform-input" accept="image/*">
+          <div class="xform-hint">Recommended: PNG/SVG, max 200×50px</div>
+        </div>
+        <div class="xform-group">
+          <label class="xform-label">Footer Text</label>
+          <textarea name="footer_txt" class="xform-input" rows="2"
+                    placeholder="Brief site description shown in the footer">{{ s.footer_txt }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEO & Analytics -->
+    <div class="xcard">
+      <div class="xcard-head"><span class="xcard-title">SEO & Analytics</span></div>
+      <div class="xcard-body">
+        <div class="xform-group">
+          <label class="xform-label">Google Analytics ID</label>
+          <input type="text" name="ga_id" value="{{ s.ga_id }}" class="xform-input" placeholder="G-XXXXXXXXXX">
+          <div class="xform-hint">Paste your Measurement ID from Google Analytics 4</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social -->
+    <div class="xcard">
+      <div class="xcard-head"><span class="xcard-title">Social Media Links</span></div>
+      <div class="xcard-body">
+        <div class="xform-row xform-row-2">
+          <div class="xform-group">
+            <label class="xform-label"><i class="fab fa-twitter" style="margin-right:6px;color:#1d9bf0"></i>Twitter / X</label>
+            <input type="url" name="twitter" value="{{ s.twitter }}" class="xform-input" placeholder="https://twitter.com/…">
+          </div>
+          <div class="xform-group">
+            <label class="xform-label"><i class="fab fa-github" style="margin-right:6px;color:var(--text-3)"></i>GitHub</label>
+            <input type="url" name="github" value="{{ s.github }}" class="xform-input" placeholder="https://github.com/…">
+          </div>
+          <div class="xform-group">
+            <label class="xform-label"><i class="fab fa-linkedin" style="margin-right:6px;color:#0077b5"></i>LinkedIn</label>
+            <input type="url" name="linkedin" value="{{ s.linkedin }}" class="xform-input" placeholder="https://linkedin.com/…">
+          </div>
+          <div class="xform-group">
+            <label class="xform-label"><i class="fab fa-instagram" style="margin-right:6px;color:#e1306c"></i>Instagram</label>
+            <input type="url" name="instagram" value="{{ s.instagram }}" class="xform-input" placeholder="https://instagram.com/…">
+          </div>
+          <div class="xform-group">
+            <label class="xform-label"><i class="fab fa-facebook" style="margin-right:6px;color:#1877f2"></i>Facebook</label>
+            <input type="url" name="facebook" value="{{ s.facebook }}" class="xform-input" placeholder="https://facebook.com/…">
+          </div>
+          <!-- YouTube field added after running: python manage.py migrate dashboard -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right column -->
+  <div style="display:flex;flex-direction:column;gap:var(--s5)">
+
+    <!-- Features -->
+    <div class="xcard">
+      <div class="xcard-head"><span class="xcard-title">Features</span></div>
+      <div class="xcard-body" style="display:flex;flex-direction:column;gap:var(--s5)">
+
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer">
+          <label class="xform-switch" style="margin-top:2px;flex-shrink:0">
+            <input type="checkbox" name="comments_on" {% if s.comments_on %}checked{% endif %}>
+            <span class="xform-switch-slider"></span>
+          </label>
+          <div>
+            <div style="font-size:.875rem;font-weight:600;color:var(--text)">Comments</div>
+            <div style="font-size:.75rem;color:var(--text-4);margin-top:2px">Allow readers to comment on posts</div>
+          </div>
+        </label>
+
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer">
+          <label class="xform-switch" style="margin-top:2px;flex-shrink:0">
+            <input type="checkbox" name="moderation_on" {% if s.moderation_on %}checked{% endif %}>
+            <span class="xform-switch-slider"></span>
+          </label>
+          <div>
+            <div style="font-size:.875rem;font-weight:600;color:var(--text)">Comment Moderation</div>
+            <div style="font-size:.75rem;color:var(--text-4);margin-top:2px">New comments require approval before appearing</div>
+          </div>
+        </label>
+
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer">
+          <label class="xform-switch" style="margin-top:2px;flex-shrink:0">
+            <input type="checkbox" name="newsletter_on" {% if s.newsletter_on %}checked{% endif %}>
+            <span class="xform-switch-slider"></span>
+          </label>
+          <div>
+            <div style="font-size:.875rem;font-weight:600;color:var(--text)">Newsletter</div>
+            <div style="font-size:.75rem;color:var(--text-4);margin-top:2px">Show email subscription forms on the site</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Save -->
+    <button type="submit" class="xbtn xbtn-primary" style="width:100%;justify-content:center;padding:12px">
+      <i class="fas fa-save"></i> Save Settings
+    </button>
+
+    <!-- Danger zone -->
+    <div class="xcard" style="border-color:rgba(239,68,68,.25)">
+      <div class="xcard-head" style="background:rgba(239,68,68,.05)">
+        <span class="xcard-title" style="color:var(--red)"><i class="fas fa-exclamation-triangle" style="margin-right:6px"></i>Danger Zone</span>
+      </div>
+      <div class="xcard-body" style="font-size:.82rem;color:var(--text-3);line-height:1.65">
+        <p>To create a superuser or manage advanced permissions, use the Django admin panel.</p>
+        <a href="/admin/" target="_blank" class="xbtn xbtn-outline xbtn-sm" style="margin-top:10px;color:var(--red);border-color:rgba(239,68,68,.3)">
+          <i class="fas fa-external-link-alt"></i> Open Django Admin
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>
+</form>
+{% endblock %}

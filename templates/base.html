@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}{{ site_name }}{% endblock %}</title>
+<meta name="description" content="{% block meta_desc %}{{ site_desc }}{% endblock %}">
+<meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+<link rel="canonical" href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}">
+
+<!-- OG -->
+<meta property="og:type"        content="{% block og_type %}website{% endblock %}">
+<meta property="og:site_name"   content="{{ site_name }}">
+<meta property="og:title"       content="{% block og_title %}{{ site_name }}{% endblock %}">
+<meta property="og:description" content="{% block og_desc %}{{ site_desc }}{% endblock %}">
+<meta property="og:url"         content="{{ request.build_absolute_uri }}">
+{% block og_image %}<meta property="og:image" content="{{ site_url }}/static/images/og-default.png">{% endblock %}
+<!-- Twitter -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="{% block tw_title %}{{ site_name }}{% endblock %}">
+<meta name="twitter:description" content="{% block tw_desc %}{{ site_desc }}{% endblock %}">
+
+<!-- Fonts: Fraunces (editorial) + Plus Jakarta Sans (UI) + Fira Code (mono) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,400;1,9..144,700;1,9..144,900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<!-- Styles -->
+<link rel="stylesheet" href="/static/css/style.css">
+{% block extra_css %}{% endblock %}
+
+<!-- JSON-LD -->
+{% block schema %}{% endblock %}
+
+<!-- Prevent flash of wrong theme -->
+<script>!function(){var t=localStorage.getItem('xtheme')||'dark';document.documentElement.setAttribute('data-theme',t)}()</script>
+</head>
+<body>
+<div id="rp"></div>
+
+<!-- ── Navigation ─────────────────────────────────────────── -->
+<nav class="xnav">
+  <div class="xnav-inner">
+
+    <!-- Logo -->
+    <a href="/" class="xnav-logo">{{ site_name }}</a>
+
+    <!-- Category links -->
+    <ul class="xnav-cats">
+      {% for cat in nav_cats %}
+      <li><a href="{{ cat.get_absolute_url }}" class="xnav-cat">{{ cat.name }}</a></li>
+      {% endfor %}
+    </ul>
+
+    <!-- Right side -->
+    <div class="xnav-right">
+
+      <!-- Search -->
+      <form class="xsearch" action="{% url 'blog:search' %}" method="get">
+        <button type="submit" class="xsearch-btn"><i class="fas fa-search"></i></button>
+        <input type="search" name="q" class="xsearch-input" placeholder="Search…" value="{{ request.GET.q }}" autocomplete="off">
+      </form>
+
+      <!-- Theme -->
+      <button class="xtheme-btn" id="themeBtn" title="Toggle theme">
+        <i class="fas fa-sun" id="themeIcon"></i>
+      </button>
+
+      {% if user.is_authenticated %}
+        <!-- Dashboard shortcut (visible to authors/staff) -->
+        {% if user.is_staff or user.is_author %}
+        <a href="{% url 'dashboard:home' %}" class="xnav-icon-btn" title="Dashboard">
+          <i class="fas fa-chart-line"></i>
+        </a>
+        <a href="{% url 'dashboard:post_create' %}" class="xnav-icon-btn" title="New Post">
+          <i class="fas fa-plus"></i>
+        </a>
+        {% endif %}
+
+        <!-- User menu -->
+        <div class="xdropdown">
+          <button class="xuser-btn">
+            <img src="{{ user.avatar_url }}" class="xavatar" alt="{{ user }}">
+            <span class="xuser-name d-none-sm">{{ user.get_full_name|default:user.username }}</span>
+            <i class="fas fa-chevron-down xuser-chevron"></i>
+          </button>
+          <div class="xdropdown-menu">
+            <!-- Header: name + email -->
+            <div class="xdropdown-header">
+              <div class="xdh-name">{{ user.get_full_name|default:user.username }}</div>
+              <div class="xdh-email">{{ user.email }}</div>
+            </div>
+            <!-- Quick-access dashboard shortcuts (authors/staff only) -->
+            {% if user.is_staff or user.is_author %}
+            <div class="xdropdown-dash-row">
+              <a href="{% url 'dashboard:home' %}" class="xdd-shortcut" title="Dashboard">
+                <i class="fas fa-chart-line"></i> Dashboard
+              </a>
+              <a href="{% url 'dashboard:posts' %}" class="xdd-shortcut" title="My Posts">
+                <i class="fas fa-file-alt"></i> Posts
+              </a>
+              <a href="{% url 'dashboard:post_create' %}" class="xdd-shortcut" title="New Post">
+                <i class="fas fa-plus"></i> New
+              </a>
+            </div>
+            {% endif %}
+            <!-- Regular items -->
+            <a href="{% url 'accounts:profile' %}" class="xdropdown-item"><i class="fas fa-user"></i>Profile</a>
+            <a href="{% url 'accounts:profile_edit' %}" class="xdropdown-item"><i class="fas fa-sliders-h"></i>Edit Profile</a>
+            {% if user.is_staff %}
+            <a href="{% url 'dashboard:settings' %}" class="xdropdown-item"><i class="fas fa-cog"></i>Site Settings</a>
+            {% endif %}
+            <div class="xdropdown-divider"></div>
+            <a href="{% url 'accounts:logout' %}" class="xdropdown-item danger"><i class="fas fa-sign-out-alt"></i>Sign out</a>
+          </div>
+        </div>
+
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="xbtn xbtn-outline xbtn-sm">Sign in</a>
+        <a href="{% url 'accounts:register' %}" class="xbtn xbtn-primary xbtn-sm">Get started</a>
+      {% endif %}
+
+      <!-- Mobile burger -->
+      <button class="xnav-burger" id="navBurger"><i class="fas fa-bars"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile nav overlay -->
+<div class="xmobile-nav" id="mobileNav">
+  <div class="xmobile-nav-header">
+    <span class="xnav-logo">{{ site_name }}</span>
+    <button id="mobileClose"><i class="fas fa-times"></i></button>
+  </div>
+  <form action="{% url 'blog:search' %}" method="get" style="margin-bottom:12px">
+    <input type="search" name="q" class="xform-input" placeholder="Search…" value="{{ request.GET.q }}">
+  </form>
+  {% for cat in nav_cats %}
+  <a href="{{ cat.get_absolute_url }}" class="xmobile-nav-item"><i class="fas fa-folder"></i>{{ cat.name }}</a>
+  {% endfor %}
+  <div style="height:1px;background:var(--border);margin:8px 0"></div>
+  {% if user.is_authenticated %}
+  {% if user.is_staff or user.is_author %}
+  <a href="{% url 'dashboard:home' %}" class="xmobile-nav-item"><i class="fas fa-chart-line"></i>Dashboard</a>
+  <a href="{% url 'dashboard:post_create' %}" class="xmobile-nav-item"><i class="fas fa-plus"></i>New Post</a>
+  {% endif %}
+  <a href="{% url 'accounts:profile' %}" class="xmobile-nav-item"><i class="fas fa-user"></i>Profile</a>
+  <a href="{% url 'accounts:logout' %}" class="xmobile-nav-item" style="color:var(--red)"><i class="fas fa-sign-out-alt"></i>Sign out</a>
+  {% else %}
+  <a href="{% url 'accounts:login' %}" class="xmobile-nav-item"><i class="fas fa-sign-in-alt"></i>Sign in</a>
+  <a href="{% url 'accounts:register' %}" class="xmobile-nav-item"><i class="fas fa-user-plus"></i>Get started</a>
+  {% endif %}
+</div>
+
+<!-- Flash messages -->
+{% if messages %}
+<div class="xflash-stack">
+  {% for m in messages %}
+  <div class="xflash xflash-{% if m.tags == 'error' %}err{% elif m.tags == 'warning' %}warn{% else %}ok{% endif %}" data-auto>
+    {{ m }}<button class="xflash-close"><i class="fas fa-times"></i></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<main id="main">{% block content %}{% endblock %}</main>
+
+<!-- ── Footer ─────────────────────────────────────────────── -->
+<footer class="xfooter">
+  <div class="xfooter-inner">
+    <div>
+      <a href="/" class="xnav-logo" style="color:var(--text-3)">{{ site_name }}</a>
+      <p style="font-size:.75rem;color:var(--text-4);margin-top:4px">{{ site_tagline }}</p>
+    </div>
+    <div class="xfooter-links">
+      {% for cat in nav_cats %}<a href="{{ cat.get_absolute_url }}" class="xfooter-link">{{ cat.name }}</a>{% endfor %}
+      <a href="{% url 'blog:search' %}" class="xfooter-link">Search</a>
+      <a href="/sitemap.xml" class="xfooter-link">Sitemap</a>
+    </div>
+    <div class="xfooter-copy">&copy; {% now "Y" %} {{ site_name }}</div>
+  </div>
+</footer>
+
+<button id="btt" title="Back to top"><i class="fas fa-arrow-up"></i></button>
+<div class="xtoast-stack"></div>
+
+<script src="/static/js/main.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

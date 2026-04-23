@@ -1,0 +1,17 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Delete Post{% endblock %}
+{% block content %}
+<div style="max-width:440px;margin:40px auto">
+  <div class="xdelete-box">
+    <div class="xdelete-icon"><i class="fas fa-trash-alt"></i></div>
+    <div class="xdelete-title">Delete this post?</div>
+    <div class="xdelete-sub">"{{ object.title }}" — all comments will be removed too. This cannot be undone.</div>
+    <form method="post">{% csrf_token %}
+      <div class="xdelete-actions">
+        <button type="submit" class="xbtn xbtn-danger xbtn-sm">Delete</button>
+        <a href="{% url 'dashboard:posts' %}" class="xbtn xbtn-outline xbtn-sm">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
