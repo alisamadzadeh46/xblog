@@ -56,3 +56,6 @@ Open http://localhost:8000
 
 ## SEO Checks (20)
 Focus keyword · title · meta desc · slug · intro · density · headings · alt text · meta title length · meta desc length · content length · heading structure · links · OG image · schema · sentence length · passive voice · transition words · paragraph length · subheading distribution
+
+## Site
+for visiting site : https://alisamadzadeh46.github.io/xblog/
